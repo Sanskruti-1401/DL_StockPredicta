@@ -39,9 +39,9 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = Field(default=7)
 
     # External APIs
-    ALPHA_VANTAGE_API_KEY: str = Field(default="")
-    NEWSAPI_API_KEY: str = Field(default="")
-    POLYGON_API_KEY: str = Field(default="")
+    ALPHA_VANTAGE_API_KEY: str = Field(default="https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=TCS.BSE&apikey=ALPHA_VANTAGE_API_KEY")
+    NEWSAPI_API_KEY: str = Field(default="https://newsapi.org/v2/everything?q=Indian+stock+market&sortBy=publishedAt&language=en&apiKey=NEWSAPI_API_KEY")
+    POLYGON_API_KEY: str = Field(default="https://api.polygon.io/v2/aggs/ticker/AAPL/range/1/day/2024-01-01/2024-02-01?apiKey=POLYGON_API_KEY")
 
     # ML Model paths
     PRICE_PREDICTION_MODEL_PATH: str = Field(default="artifacts/models/price_predictor.pkl")
