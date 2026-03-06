@@ -7,8 +7,8 @@ from typing import Optional, Dict, List
 import numpy as np
 from sqlalchemy.orm import Session
 
-from ...db.models import Stock, RiskMetric, PriceHistory
-from ..V1.schemas.risk import RiskMetricSchema
+from ..db.models import Stock, RiskMetric, PriceHistory
+from ..api.V1.schemas.risk import RiskMetricSchema
 
 logger = logging.getLogger(__name__)
 

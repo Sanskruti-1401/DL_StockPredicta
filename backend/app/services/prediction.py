@@ -8,8 +8,8 @@ import pickle
 import numpy as np
 from sqlalchemy.orm import Session
 
-from ...db.models import Stock, StockPrediction, TechnicalIndicator, NewsArticle, PriceHistory
-from ..V1.schemas.prediction import PredictionSchema, PredictionCreateSchema
+from ..db.models import Stock, StockPrediction, TechnicalIndicator, NewsArticle, PriceHistory
+from ..api.V1.schemas.prediction import PredictionSchema, PredictionCreateSchema
 
 logger = logging.getLogger(__name__)
 

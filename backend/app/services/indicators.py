@@ -7,7 +7,7 @@ from typing import Optional, List
 import numpy as np
 from sqlalchemy.orm import Session
 
-from ...db.models import Stock, TechnicalIndicator, PriceHistory
+from ..db.models import Stock, TechnicalIndicator, PriceHistory
 
 logger = logging.getLogger(__name__)
 

@@ -5,10 +5,10 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from ...db.base import get_db
-from ...db.models import Stock, User
-from ..V1.schemas.stock import StockSchema, StockDetailSchema, StockCreateSchema, StockUpdateSchema
-from ...services.market_data import MarketDataService
+from ....db.base import get_db
+from ....db.models import Stock, User
+from ..schemas.stock import StockSchema, StockDetailSchema, StockCreateSchema, StockUpdateSchema
+from ....services.market_data import MarketDataService
 from .auth import get_current_user
 
 logger = logging.getLogger(__name__)

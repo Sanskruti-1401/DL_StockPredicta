@@ -5,7 +5,7 @@ import logging
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from ...db.base import get_db
+from ....db.base import get_db
 
 logger = logging.getLogger(__name__)
 router = APIRouter()

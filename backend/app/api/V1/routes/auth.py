@@ -10,9 +10,9 @@ from pydantic import BaseModel, EmailStr
 from passlib.context import CryptContext
 import jwt
 
-from ...db.base import get_db
-from ...db.models import User
-from ...core.config import settings
+from ....db.base import get_db
+from ....db.models import User
+from ....core.config import settings
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["Authentication"])

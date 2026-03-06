@@ -6,8 +6,8 @@ from datetime import datetime, timedelta
 from typing import Optional, List
 from sqlalchemy.orm import Session
 
-from ...db.models import Stock, NewsArticle
-from ...core.config import settings
+from ..db.models import Stock, NewsArticle
+from ..core.config import settings
 
 logger = logging.getLogger(__name__)
 

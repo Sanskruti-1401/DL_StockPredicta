@@ -6,10 +6,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
-from ...db.base import get_db
-from ...db.models import Stock, RiskMetric, User
-from ...services.risk import RiskService
-from ..V1.schemas.risk import (
+from ....db.base import get_db
+from ....db.models import Stock, RiskMetric, User
+from ....services.risk import RiskService
+from ..schemas.risk import (
     RiskMetricSchema, RiskDashboardSchema, RiskAnalysisSchema,
     PortfolioRiskSchema, StressTestSchema
 )
