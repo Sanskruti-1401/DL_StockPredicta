@@ -178,30 +178,30 @@ class MLPredictionEngine:
         buy_score = 0.0
         sell_score = 0.0
         
-        # RSI analysis (0-100 scale) - more lenient
+        # RSI analysis (0-100 scale) - more responsive
         if rsi > 70:
             sell_score += 3  # Overbought
-        elif rsi > 55:
+        elif rsi > 60:
             sell_score += 1.5  # Leaning overbought
         elif rsi < 30:
             buy_score += 3  # Oversold
-        elif rsi < 45:
+        elif rsi < 40:
             buy_score += 1.5  # Leaning oversold
         
-        # Momentum analysis (percentage change) - lower thresholds
-        if momentum > 1.5:
+        # Momentum analysis (percentage change) - more sensitive
+        if momentum > 1.0:
             buy_score += 2  # Positive momentum
-        elif momentum > 0.2:
+        elif momentum > 0.1:
             buy_score += 1  # Slight positive
-        elif momentum < -1.5:
+        elif momentum < -1.0:
             sell_score += 2  # Negative momentum
-        elif momentum < -0.2:
+        elif momentum < -0.1:
             sell_score += 1  # Slight negative
         
         # Price trend analysis (percentage change)
-        if price_change > 0.5:
+        if price_change > 0.3:
             buy_score += 1
-        elif price_change < -0.5:
+        elif price_change < -0.3:
             sell_score += 1
         
         # Confidence factor (boost moderate signals)
@@ -210,11 +210,12 @@ class MLPredictionEngine:
             if buy_score == sell_score:
                 buy_score += 0.5
         
-        # Decision logic - more balanced
+        # Decision logic - more balanced and responsive
         diff = buy_score - sell_score
-        if diff > 1.2:
+        # Lowered thresholds to show more BUY/SELL variation in demo
+        if diff >= 0.5:
             return "BUY"
-        elif diff < -1.2:
+        elif diff <= -0.5:
             return "SELL"
         else:
             return "HOLD"

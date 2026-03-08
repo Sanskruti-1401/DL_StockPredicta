@@ -27,6 +27,17 @@ class Settings(BaseSettings):
     DATABASE_ECHO: bool = Field(default=False)
     DATABASE_POOL_SIZE: int = Field(default=20)
     DATABASE_POOL_RECYCLE: int = Field(default=3600)
+    
+    def model_post_init(self, __context):
+        """Convert relative database path to absolute path."""
+        url = self.DATABASE_URL
+        
+        # If it's a relative SQLite path, convert to absolute
+        if url.startswith("sqlite:///./"):
+            file_path = url.replace("sqlite:///./", "")
+            project_root = Path(__file__).parent.parent.parent
+            absolute_path = project_root / file_path
+            self.DATABASE_URL = f"sqlite:///{absolute_path}"
 
     # Server settings
     HOST: str = Field(default="0.0.0.0")

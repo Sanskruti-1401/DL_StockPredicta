@@ -30,8 +30,12 @@ export const InsightGrid: React.FC<InsightGridProps> = ({ stock }) => {
       try {
         console.log(`[InsightGrid] Fetching data for stock ${stock.id}...`);
         
+        // Use absolute URL directly to backend
+        const apiUrl = `http://localhost:8000/api/v1/predictions/${stock.id}?hours_ahead=24`;
+        console.log(`[InsightGrid] Fetching from: ${apiUrl}`);
+        
         // Fetch predictions which includes technical analysis
-        const response = await fetch(`/api/v1/predictions/${stock.id}?hours_ahead=24`);
+        const response = await fetch(apiUrl);
         console.log(`[InsightGrid] Predictions response status: ${response.status}`);
         
         if (response.ok) {
@@ -51,7 +55,10 @@ export const InsightGrid: React.FC<InsightGridProps> = ({ stock }) => {
         
         // Fetch sentiment data
         try {
-          const sentimentResponse = await fetch(`/api/v1/sentiment/${stock.id}`);
+          const sentimentUrl = `http://localhost:8000/api/v1/sentiment/${stock.id}`;
+          console.log(`[InsightGrid] Fetching sentiment from: ${sentimentUrl}`);
+          
+          const sentimentResponse = await fetch(sentimentUrl);
           console.log(`[InsightGrid] Sentiment response status: ${sentimentResponse.status}`);
           
           if (sentimentResponse.ok) {

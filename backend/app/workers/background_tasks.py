@@ -10,6 +10,7 @@ from ..db.base import get_db
 from ..db.models import Stock, PriceHistory
 from ..services.ml_prediction import ml_engine
 from ..services.sentiment import sentiment_analyzer
+from ..services.news_sentiment import NewsSentimentService
 
 logger = logging.getLogger(__name__)
 
@@ -153,6 +154,7 @@ async def update_sentiment_data():
     """
     Background task to update sentiment data periodically.
     Runs every 10 minutes to fetch new news and update sentiment scores.
+    Attempts real NewsAPI calls if configured, falls back to mock data.
     """
     while True:
         try:
@@ -163,12 +165,17 @@ async def update_sentiment_data():
             
             for stock in stocks:
                 try:
-                    # Update sentiment using the sentiment analyzer
-                    sentiment = sentiment_analyzer.get_sentiment_for_stock(stock.symbol)
-                    logger.debug(f"Updated sentiment for {stock.symbol}")
+                    # Try to fetch real news from NewsAPI
+                    news_service = NewsSentimentService(db)
+                    result = news_service.fetch_and_process_news(stock.id, stock.symbol)
+                    
+                    if result.get("articles_fetched", 0) > 0:
+                        logger.info(f"✅ Fetched {result.get('articles_fetched')} real articles for {stock.symbol}")
+                    else:
+                        logger.debug(f"No new articles for {stock.symbol} (using mock sentiment)")
                     
                 except Exception as e:
-                    logger.debug(f"Error updating sentiment for {stock.symbol}: {e}")
+                    logger.debug(f"Error fetching real news for {stock.symbol}: {e} (will use mock sentiment)")
             
             db.close()
             logger.debug("Sentiment update cycle completed")

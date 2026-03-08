@@ -161,21 +161,45 @@ class SentimentAnalyzer:
 
     def _generate_mock_sentiment(self, stock_symbol: str) -> Dict:
         """Generate realistic mock sentiment for demonstration."""
-        # Seed sentiment based on stock ID
+        # Seed sentiment based on stock symbol
         seed = hash(stock_symbol) % 100
         base_sentiment = (seed - 50) / 100  # Range: -0.5 to 0.5
 
         label = self._get_sentiment_label(base_sentiment)
+
+        # Vary article counts based on seed for realistic variation
+        total_articles = 8 + (seed % 15)  # Range: 8-22 articles
+        
+        # Distribute based on sentiment
+        if base_sentiment > 0.2:
+            # Positive sentiment: more positive articles
+            positive_articles = int(total_articles * (0.5 + base_sentiment))
+            negative_articles = int(total_articles * (0.2 - (base_sentiment * 0.1)))
+        elif base_sentiment < -0.2:
+            # Negative sentiment: more negative articles
+            negative_articles = int(total_articles * (0.5 + abs(base_sentiment)))
+            positive_articles = int(total_articles * (0.2 - (abs(base_sentiment) * 0.1)))
+        else:
+            # Neutral sentiment: balanced
+            positive_articles = int(total_articles * 0.35)
+            negative_articles = int(total_articles * 0.35)
+        
+        neutral_articles = total_articles - positive_articles - negative_articles
+        
+        # Ensure non-negative counts
+        positive_articles = max(0, positive_articles)
+        negative_articles = max(0, negative_articles)
+        neutral_articles = max(0, neutral_articles)
 
         return {
             "status": "success",
             "stock_symbol": stock_symbol,
             "overall_sentiment": round(base_sentiment, 2),
             "sentiment_label": label,
-            "positive_articles": 5,
-            "negative_articles": 3,
-            "neutral_articles": 2,
-            "total_articles": 10,
+            "positive_articles": positive_articles,
+            "negative_articles": negative_articles,
+            "neutral_articles": neutral_articles,
+            "total_articles": positive_articles + negative_articles + neutral_articles,
             "source": "mock",
             "analyzed_at": datetime.utcnow().isoformat(),
         }

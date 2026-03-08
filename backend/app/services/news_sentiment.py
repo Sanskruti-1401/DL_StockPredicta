@@ -21,7 +21,7 @@ class NewsSentimentService:
 
     def fetch_news(self, symbol: str, limit: int = 50) -> List[dict]:
         """
-        Fetch latest news for a stock.
+        Fetch latest news for a stock from NewsAPI.
         
         Args:
             symbol: Stock symbol
@@ -31,12 +31,41 @@ class NewsSentimentService:
             List of news articles
         """
         try:
-            logger.info(f"Fetching news for {symbol}")
+            import requests
             
-            # Integration with NewsAPI
-            # https://newsapi.org/v2/everything?q={symbol}&sortBy=publishedAt&language=en
+            if not self.newsapi_key or "newsapi.org" in self.newsapi_key or self.newsapi_key.startswith("http"):
+                logger.warning(f"NewsAPI key not configured properly. Returning empty results. Configure NEWSAPI_API_KEY in .env")
+                return []
             
-            # Mock implementation for now
+            logger.info(f"Fetching news for {symbol} from NewsAPI")
+            
+            # NewsAPI endpoint
+            url = "https://newsapi.org/v2/everything"
+            
+            params = {
+                "q": symbol,
+                "apiKey": self.newsapi_key,
+                "sortBy": "publishedAt",
+                "language": "en",
+                "pageSize": limit,
+                "from": (datetime.utcnow() - timedelta(days=30)).strftime("%Y-%m-%d")
+            }
+            
+            response = requests.get(url, params=params, timeout=10)
+            response.raise_for_status()
+            
+            data = response.json()
+            
+            if data.get("status") != "ok":
+                logger.warning(f"NewsAPI returned status: {data.get('status')}, message: {data.get('message')}")
+                return []
+            
+            articles = data.get("articles", [])
+            logger.info(f"Fetched {len(articles)} articles for {symbol} from NewsAPI")
+            return articles
+            
+        except requests.exceptions.RequestException as e:
+            logger.error(f"NewsAPI request error for {symbol}: {e}")
             return []
         except Exception as e:
             logger.error(f"Error fetching news for {symbol}: {e}")

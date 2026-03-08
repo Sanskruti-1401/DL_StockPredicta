@@ -106,10 +106,12 @@ export const HybridChart: React.FC<HybridChartProps> = ({ stock }) => {
           console.log(`✅ [HybridChart] Loaded ${data.length} price records`);
           setPriceData(data);
 
-          // Fetch real ML predictions from API
+          // Fetch real ML predictions from API - use absolute URL
           try {
             console.log(`🧠 [HybridChart] Fetching real ML predictions for ${stock.symbol}...`);
-            const response = await fetch(`/api/v1/predictions/${stock.id}?hours_ahead=24`);
+            const predictionUrl = `http://localhost:8000/api/v1/predictions/${stock.id}?hours_ahead=24`;
+            console.log(`[HybridChart] Fetching from: ${predictionUrl}`);
+            const response = await fetch(predictionUrl);
             console.log(`[HybridChart] Predictions API response status: ${response.status}`);
             
             if (!response.ok) {
