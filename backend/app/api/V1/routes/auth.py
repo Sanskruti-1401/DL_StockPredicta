@@ -194,7 +194,17 @@ async def login(request: LoginRequest, db: Session = Depends(get_db)):
         # Find user by email
         user = db.query(User).filter(User.email == request.email).first()
         
-        if not user or not verify_password(request.password, user.hashed_password):
+        logger.info(f"Login attempt for {request.email}")
+        
+        if not user:
+            logger.warning(f"User not found: {request.email}")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid credentials"
+            )
+        
+        if not verify_password(request.password, user.hashed_password):
+            logger.warning(f"Invalid password for user: {request.email}")
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid credentials"

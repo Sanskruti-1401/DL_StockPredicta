@@ -6,9 +6,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import List
+from datetime import datetime, timedelta
+import random
 
 from ....db.base import get_db
-from ....db.models import Stock
+from ....db.models import Stock, PriceHistory
 from .auth import get_current_user
 
 logger = logging.getLogger(__name__)
@@ -134,6 +136,90 @@ class StockSeedList(BaseModel):
     total: int
     stocks: List[dict]
     description: str
+
+
+# ==================== Helper Functions ====================
+
+def generate_price_history(stock_id: int, symbol: str, days: int = 90):
+    """
+    Generate synthetic historical price data for a stock.
+    
+    Args:
+        stock_id: Database stock ID
+        symbol: Stock symbol (for realistic price ranges)
+        days: Number of days to generate (default 90 for better technical analysis)
+    
+    Returns:
+        List of PriceHistory objects
+    """
+    # Base prices for realistic ranges
+    base_prices = {
+        "AAPL": 190, "MSFT": 430, "GOOGL": 150, "AMZN": 180, "NVDA": 875,
+        "META": 525, "TSLA": 240, "JPM": 200, "JNJ": 160, "V": 290
+    }
+    
+    base_price = base_prices.get(symbol, 100)
+    volatility = random.uniform(0.01, 0.04)  # 1-4% daily volatility
+    
+    prices = []
+    current_price = base_price
+    
+    # Generate daily prices for the last 'days' days
+    for i in range(days, 0, -1):
+        # Random walk with trend
+        daily_return = random.gauss(0.0005, volatility)  # Mean return + random movement
+        current_price = current_price * (1 + daily_return)
+        
+        # Add realistic OHLC variations
+        open_price = current_price
+        high_price = open_price * (1 + random.uniform(0, 0.02))
+        low_price = open_price * (1 - random.uniform(0, 0.02))
+        close_price = random.uniform(low_price, high_price)
+        volume = random.randint(1000000, 100000000)
+        
+        # Use market close time (4 PM = 21:00 UTC)
+        date = (datetime.utcnow() - timedelta(days=i)).replace(hour=21, minute=0, second=0, microsecond=0)
+        
+        price_record = PriceHistory(
+            stock_id=stock_id,
+            date=date,
+            open_price=round(open_price, 2),
+            high_price=round(high_price, 2),
+            low_price=round(low_price, 2),
+            close_price=round(close_price, 2),
+            volume=volume,
+            adjusted_close=round(close_price, 2)
+        )
+        prices.append(price_record)
+        current_price = close_price
+    
+    # Generate hourly data for today (9:30 AM to 4 PM UTC)
+    today = datetime.utcnow()
+    today_9am = today.replace(hour=9, minute=30, second=0, microsecond=0)
+    today_4pm = today.replace(hour=21, minute=0, second=0, microsecond=0)
+    
+    current_intraday = today_9am
+    intraday_price = current_price
+    
+    while current_intraday <= today_4pm:
+        # Smaller intraday volatility
+        intraday_return = random.gauss(0.00001, volatility / 10)
+        intraday_price = intraday_price * (1 + intraday_return)
+        
+        hour_record = PriceHistory(
+            stock_id=stock_id,
+            date=current_intraday,
+            open_price=round(intraday_price * 0.99, 2),
+            high_price=round(intraday_price * 1.01, 2),
+            low_price=round(intraday_price * 0.99, 2),
+            close_price=round(intraday_price, 2),
+            volume=random.randint(500000, 10000000),
+            adjusted_close=round(intraday_price, 2)
+        )
+        prices.append(hour_record)
+        current_intraday += timedelta(hours=1)
+    
+    return prices
 
 
 # ==================== Seed Endpoints ====================

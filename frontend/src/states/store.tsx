@@ -67,8 +67,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }: { 
     apiClient.setToken(accessToken);
     console.log('🔑 [AuthProvider] apiClient token set, calling setToken()');
     
+    localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshToken);
-    console.log('💾 [AuthProvider] Refresh token stored in localStorage');
+    console.log('💾 [AuthProvider] Tokens stored in localStorage');
   };
 
   const logout = () => {

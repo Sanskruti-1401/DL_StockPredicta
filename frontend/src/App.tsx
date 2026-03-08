@@ -10,9 +10,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 // Pages
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
-import { Dashboard } from './pages/Dashboard';
-import { Risk } from './pages/Risk';
-import { StockDetail } from './pages/StockDetail';
+import { DashboardV2 } from './pages/DashboardV2';
 
 // Styles
 import './App.css';
@@ -32,25 +30,7 @@ export const App: React.FC = () => {
               path="/dashboard"
               element={
                 <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/risk"
-              element={
-                <ProtectedRoute>
-                  <Risk />
-                </ProtectedRoute>
-              }
-            />
-
-            <Route
-              path="/stocks/:id"
-              element={
-                <ProtectedRoute>
-                  <StockDetail />
+                  <DashboardV2 />
                 </ProtectedRoute>
               }
             />

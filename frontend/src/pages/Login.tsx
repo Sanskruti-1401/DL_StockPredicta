@@ -2,7 +2,7 @@
  * Login Page Component
  */
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../states/store';
 import { authEndpoints } from '../api/endpoint';
@@ -10,18 +10,28 @@ import '../styles/auth.css';
 
 export const Login: React.FC = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Redirect to dashboard when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log('✨ [Login] Authenticated, redirecting to dashboard');
+      navigate('/dashboard');
+    }
+  }, [isAuthenticated, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('=== FORM SUBMITTED ===');
     setError(null);
 
     if (!email || !password) {
+      console.log('Missing fields:', { email, password });
       setError('Please fill in all fields');
       return;
     }
@@ -49,11 +59,7 @@ export const Login: React.FC = () => {
         
         console.log('🔄 [Login] Calling login() function...');
         login(data.user, data.access_token, data.refresh_token);
-        
-        console.log('📍 [Login] Navigating to dashboard...');
-        navigate('/dashboard');
-        
-        console.log('✨ [Login] Navigate called');
+        // Navigation will be handled by useEffect watching isAuthenticated
       }
     } catch (err) {
       console.error('💥 [Login] Caught exception:', err);

@@ -2,12 +2,19 @@
 Application configuration and settings.
 """
 from typing import List
-from pydantic_settings import BaseSettings
+from pathlib import Path
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field
 
 
 class Settings(BaseSettings):
     """Application settings from environment variables."""
+    
+    model_config = SettingsConfigDict(
+        env_file=str(Path(__file__).parent.parent.parent / ".env"),
+        env_file_encoding="utf-8",
+        case_sensitive=False
+    )
 
     # App settings
     APP_NAME: str = Field(default="Stock Predictor")
@@ -16,7 +23,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = Field(default="development")
 
     # Database settings
-    DATABASE_URL: str = Field(default="postgresql://user:password@localhost:5432/stock_predictor")
+    DATABASE_URL: str = Field(default="sqlite:///./test.db")
     DATABASE_ECHO: bool = Field(default=False)
     DATABASE_POOL_SIZE: int = Field(default=20)
     DATABASE_POOL_RECYCLE: int = Field(default=3600)
@@ -55,10 +62,6 @@ class Settings(BaseSettings):
     # Logging settings
     LOG_LEVEL: str = Field(default="INFO")
     LOG_FILE: str = Field(default="logs/app.log")
-
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
 
 
 settings = Settings()

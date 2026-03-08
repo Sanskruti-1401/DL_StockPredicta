@@ -4,9 +4,10 @@ Stock management routes.
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
+from datetime import datetime, timedelta
 
 from ....db.base import get_db
-from ....db.models import Stock, User
+from ....db.models import Stock, User, PriceHistory
 from ..schemas.stock import StockSchema, StockDetailSchema, StockCreateSchema, StockUpdateSchema
 from ....services.market_data import MarketDataService
 from .auth import get_current_user
@@ -198,9 +199,6 @@ async def get_price_history(
 ):
     """Get price history for a stock."""
     try:
-        from datetime import datetime, timedelta
-        from ...db.models import PriceHistory
-        
         # Verify stock exists
         stock = db.query(Stock).filter(Stock.id == stock_id).first()
         if not stock:
