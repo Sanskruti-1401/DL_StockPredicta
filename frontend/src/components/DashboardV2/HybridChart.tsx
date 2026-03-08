@@ -54,6 +54,8 @@ export const HybridChart: React.FC<HybridChartProps> = ({ stock }) => {
   const [timeRange, setTimeRange] = useState<'1D' | '5D' | '1M' | '6M'>('1D');
   const [tooltip, setTooltip] = useState<TooltipState>(DEFAULT_TOOLTIP);
   const [recommendation, setRecommendation] = useState<string>('HOLD');
+  const [currentPrice, setCurrentPrice] = useState<number>(0);
+  const [predictedPrice, setPredictedPrice] = useState<number>(0);
   const svgRef = useRef<SVGSVGElement>(null);
 
   // Real-time WebSocket updates - updates state through callbacks
@@ -105,6 +107,8 @@ export const HybridChart: React.FC<HybridChartProps> = ({ stock }) => {
         } else if (data && data.length > 0) {
           console.log(`✅ [HybridChart] Loaded ${data.length} price records`);
           setPriceData(data);
+          // Set current price from latest price data
+          setCurrentPrice(data[data.length - 1]?.close_price || 0);
 
           // Fetch real ML predictions from API - use absolute URL
           try {
@@ -138,23 +142,19 @@ export const HybridChart: React.FC<HybridChartProps> = ({ stock }) => {
               setPredictions(apiPredictions);
               setRecommendation(predictionData.recommendation || 'HOLD');
               console.log(`📊 [HybridChart] Recommendation: ${predictionData.recommendation}`);
+              
+              // Store the last (furthest) predicted price for stats footer
+              if (apiPredictions.length > 0) {
+                setPredictedPrice(apiPredictions[apiPredictions.length - 1].price);
+              }
             } else {
               throw new Error('No predictions in response');
             }
           } catch (predErr) {
             const msg = predErr instanceof Error ? predErr.message : 'Failed to fetch predictions';
             console.error(`❌ [HybridChart] Failed to fetch AI predictions: ${msg}`);
-            
-            // Fallback to synthetic predictions if API fails
-            try {
-              const syntheticPreds = generateSyntheticPredictions(data);
-              setPredictions(syntheticPreds);
-              console.log(`📊 [HybridChart] Generated ${syntheticPreds.length} synthetic predictions`);
-            } catch (fallbackErr) {
-              const fallbackMsg = fallbackErr instanceof Error ? fallbackErr.message : 'Failed to generate predictions';
-              console.error(`❌ [HybridChart] Fallback prediction error:`, fallbackMsg);
-              setError(fallbackMsg);
-            }
+            // No fallback - only use real API data
+            setError(msg);
           }
         } else {
           setError('No price data available');
@@ -673,39 +673,41 @@ export const HybridChart: React.FC<HybridChartProps> = ({ stock }) => {
 
       {/* Chart stats footer */}
       <div className="chart-stats">
-        <div className="stat-item">
-          <span className="stat-label">Current Price</span>
-          <span className="stat-value">${priceData[priceData.length - 1]?.close.toFixed(2)}</span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Prediction (24h)</span>
-          <span className="stat-value prediction">
-            ${predictions[predictions.length - 1]?.price.toFixed(2)}
-          </span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Expected Change</span>
-          <span
-            className={`stat-value ${
-              (predictions[predictions.length - 1]?.price ?? 0) >
-              (priceData[priceData.length - 1]?.close ?? 0)
-                ? 'positive'
-                : 'negative'
-            }`}
-          >
-            {(
-              (((predictions[predictions.length - 1]?.price ?? 0) -
-                (priceData[priceData.length - 1]?.close ?? 0)) /
-                (priceData[priceData.length - 1]?.close ?? 1)) *
-                100
-            ).toFixed(2)}
-            %
-          </span>
-        </div>
-        <div className="stat-item">
-          <span className="stat-label">Volatility</span>
-          <span className="stat-value">{calculateVolatility(priceData).toFixed(2)}%</span>
-        </div>
+        {currentPrice > 0 && (
+          <div className="stat-item">
+            <span className="stat-label">Current Price</span>
+            <span className="stat-value">${currentPrice.toFixed(2)}</span>
+          </div>
+        )}
+        {predictedPrice > 0 && (
+          <div className="stat-item">
+            <span className="stat-label">Prediction (24h)</span>
+            <span className="stat-value prediction">
+              ${predictedPrice.toFixed(2)}
+            </span>
+          </div>
+        )}
+        {predictedPrice > 0 && currentPrice > 0 && (
+          <div className="stat-item">
+            <span className="stat-label">Expected Change</span>
+            <span
+              className={`stat-value ${
+                predictedPrice > currentPrice ? 'positive' : 'negative'
+              }`}
+            >
+              {(((predictedPrice - currentPrice) / currentPrice) * 100).toFixed(2)}%
+            </span>
+          </div>
+        )}
+        {(() => {
+          const vol = calculateVolatility(priceData);
+          return isFinite(vol) && vol > 0 ? (
+            <div className="stat-item">
+              <span className="stat-label">Volatility</span>
+              <span className="stat-value">{vol.toFixed(2)}%</span>
+            </div>
+          ) : null;
+        })()}
         <div className="stat-item">
           <span className="stat-label">Recommendation</span>
           <span className={`stat-value recommendation ${recommendation.toLowerCase()}`}>

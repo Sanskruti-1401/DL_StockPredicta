@@ -217,16 +217,20 @@ export const InsightGrid: React.FC<InsightGridProps> = ({ stock }) => {
         <h4 className="insight-title">Fundamentals</h4>
         
         <div className="fundamental-table">
-          <div className="fundamental-row">
-            <span className="fundamental-label">Market Cap</span>
-            <span className="fundamental-value">
-              ${stock.market_cap ? `${(stock.market_cap / 1e9).toFixed(2)}B` : 'N/A'}
-            </span>
-          </div>
-          <div className="fundamental-row">
-            <span className="fundamental-label">P/E Ratio</span>
-            <span className="fundamental-value">{stock.pe_ratio?.toFixed(2) || 'N/A'}</span>
-          </div>
+          {stock.market_cap && (
+            <div className="fundamental-row">
+              <span className="fundamental-label">Market Cap</span>
+              <span className="fundamental-value">
+                ${(stock.market_cap / 1e9).toFixed(2)}B
+              </span>
+            </div>
+          )}
+          {stock.pe_ratio && (
+            <div className="fundamental-row">
+              <span className="fundamental-label">P/E Ratio</span>
+              <span className="fundamental-value">{stock.pe_ratio.toFixed(2)}</span>
+            </div>
+          )}
           <div className="fundamental-row">
             <span className="fundamental-label">52W High</span>
             <span className="fundamental-value">${estimated52wHigh}</span>
@@ -235,12 +239,14 @@ export const InsightGrid: React.FC<InsightGridProps> = ({ stock }) => {
             <span className="fundamental-label">52W Low</span>
             <span className="fundamental-value">${estimated52wLow}</span>
           </div>
-          <div className="fundamental-row">
-            <span className="fundamental-label">Dividend Yield</span>
-            <span className="fundamental-value">
-              {stock.dividend_yield ? `${(stock.dividend_yield * 100).toFixed(2)}%` : 'N/A'}
-            </span>
-          </div>
+          {stock.dividend_yield !== null && stock.dividend_yield !== undefined && (
+            <div className="fundamental-row">
+              <span className="fundamental-label">Dividend Yield</span>
+              <span className="fundamental-value">
+                {(stock.dividend_yield * 100).toFixed(2)}%
+              </span>
+            </div>
+          )}
         </div>
       </div>
     </div>
